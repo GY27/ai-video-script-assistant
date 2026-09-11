@@ -18,7 +18,7 @@ function setLoading(isLoading) {
 function text(value) { return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char])); }
 function render(data) {
   document.querySelector('#hooks').innerHTML = (Array.isArray(data.hooks) ? data.hooks : []).slice(0, 3).map((hook, i) => `<article class="hook"><span class="hook-number">0${i + 1}</span><p>${text(hook)}</p></article>`).join('');
-  document.querySelector('#storyboard').innerHTML = (Array.isArray(data.storyboard) ? data.storyboard : []).map(shot => `<article class="shot"><div class="shot-time">${text(shot.time)}</div><div class="shot-main"><label>分镜 / 画面</label><p>${text(shot.visual)}</p><p class="shoot-tip">拍摄建议：${text(shot.shootingSuggestion)}</p></div><div class="shot-voice"><label>${text(shot.sectionTopic || '口播内容')}</label><p>${text(shot.voiceover)}</p></div></article>`).join('');
+  document.querySelector('#storyboard').innerHTML = (Array.isArray(data.storyboard) ? data.storyboard : []).map(shot => `<article class="shot"><div class="shot-time">${text(shot.time)}</div><div class="shot-main"><label>分镜 / 画面</label><p>${text(shot.visual)}</p><p class="shoot-tip">拍摄建议：${text(shot.shootingSuggestion)}</p></div><div class="shot-voice"><label>对应口播文案</label><p class="shot-topic">${text(shot.sectionTopic)}</p><p>${text(shot.voiceover)}</p></div></article>`).join('');
   currentVoiceover = String(data.fullVoiceover || '');
   document.querySelector('#full-voiceover').textContent = currentVoiceover;
   content.hidden = false; emptyState.hidden = true; loadingState.hidden = true;
@@ -31,7 +31,10 @@ form.addEventListener('submit', async event => {
   setLoading(true);
   try {
     const fields = new FormData(form);
-    const response = await fetch('/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(Object.fromEntries(fields)) });
+    const controller = new AbortController();
+    const timeout = setTimeout(() => controller.abort(), 30000);
+    const response = await fetch('/api/generate', { method:'POST', headers:{'Content-Type':'application/json'}, body:JSON.stringify(Object.fromEntries(fields)), signal: controller.signal });
+    clearTimeout(timeout);
     if (!response.ok) throw new Error('request failed');
     const data = await response.json();
     if (!data || !Array.isArray(data.storyboard) || !data.fullVoiceover) throw new Error('invalid result');
