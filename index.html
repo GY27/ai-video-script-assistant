@@ -50,17 +50,24 @@
 
             <label for="model">AI模型</label>
             <select id="model" name="model">
-              <option value="默认模型" selected>默认模型</option>
+              <option value="DeepSeek" selected>DeepSeek</option>
+              <option value="默认模型" disabled>默认模型（暂不可用）</option>
               <option value="DeepSeek">DeepSeek</option>
-              <option value="OpenAI">OpenAI</option>
-              <option value="Gemini">Gemini</option>
-              <option value="Claude">Claude</option>
-              <option value="自定义模型">自定义模型</option>
+              <option value="OpenAI" disabled>OpenAI（暂不可用）</option>
+              <option value="Gemini" disabled>Gemini（暂不可用）</option>
+              <option value="Claude" disabled>Claude（暂不可用）</option>
+              <option value="自定义模型" disabled>自定义模型（暂不可用）</option>
             </select>
-            <p class="field-hint">模型由服务端统一配置，密钥不会出现在网页中。</p>
+            <p class="field-hint">当前已接入 DeepSeek，其他模型后续开放。</p>
+            <label for="personaTemplate">人设模板</label>
+            <select id="personaTemplate" name="personaTemplate">
+              <option value="理性测评型">理性测评型｜客观、有依据、不夸张</option><option value="朋友分享型" selected>朋友分享型｜自然、真诚、像聊天</option><option value="专业科普型">专业科普型｜清晰、严谨、通俗易懂</option><option value="经验避坑型">经验避坑型｜直接、有观点、强调实用</option><option value="种草推荐型">种草推荐型｜有感染力、但不硬广</option><option value="自定义人设">自定义人设</option>
+            </select>
+            <label for="persona">我的人设与边界 <span>（可选）</span></label>
+            <textarea id="persona" name="persona" rows="4" placeholder="例如：我是一个真实、懂车但不油腻的汽车博主，面向第一次买车的年轻人。不了解的参数不编造，语气像朋友聊天，不强行销售。"></textarea>
 
             <label for="requirements">创作要求 <span>（可选）</span></label>
-            <textarea id="requirements" name="requirements" rows="5" placeholder="可以补充你希望AI遵守的要求，例如：&#10;开头直接报车型，不要太销售感，语气自然一点，突出性价比，适合小红书"></textarea>
+            <p class="guide">填写这条视频特别要做到什么，可以按“开头 + 重点 + 语气 + 平台”来写。</p><textarea id="requirements" name="requirements" rows="5" placeholder="例如：&#10;开头3秒直接抛出问题&#10;重点讲新手最容易忽略的地方&#10;不要太销售，像朋友分享&#10;适合小红书，也方便口播"></textarea>
 
             <button id="generate-button" type="submit"><span>生成脚本</span><span aria-hidden="true">→</span></button>
             <p id="form-message" class="form-message" role="alert"></p>
