@@ -1,0 +1,8 @@
+# Local Cloudflare / Wrangler settings and secrets
+.dev.vars
+.env
+.env.*
+!.env.example
+.wrangler/
+node_modules/
+.DS_Store

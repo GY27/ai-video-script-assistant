@@ -1,0 +1,102 @@
+<!doctype html>
+<html lang="zh-CN">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <meta name="description" content="输入主题，生成可直接拍摄的短视频脚本、分镜与口播稿。" />
+    <title>AI 短视频脚本助手</title>
+    <link rel="stylesheet" href="style.css" />
+  </head>
+  <body>
+    <main class="app-shell">
+      <header class="hero">
+        <p class="eyebrow">AI VIDEO SCRIPTING</p>
+        <h1>AI 短视频脚本助手</h1>
+        <p>输入一个主题，生成可直接拍摄的完整脚本、分镜与口播稿。</p>
+      </header>
+
+      <div class="workspace">
+        <section class="panel controls-panel" aria-labelledby="settings-title">
+          <div class="panel-title">
+            <span class="step">01</span>
+            <h2 id="settings-title">创作设置</h2>
+          </div>
+          <form id="script-form">
+            <label for="topic">视频主题 <em>*</em></label>
+            <textarea id="topic" name="topic" rows="6" required placeholder="请输入你想拍的视频主题，例如：&#10;&#10;为什么现在买二手小鹏P7很划算？&#10;第一次买冲锋衣最容易踩的3个坑"></textarea>
+
+            <div class="field-grid">
+              <div>
+                <label for="duration">视频时长</label>
+                <select id="duration" name="duration">
+                  <option value="30秒">30秒</option>
+                  <option value="60秒" selected>60秒</option>
+                  <option value="90秒">90秒</option>
+                  <option value="120秒">120秒</option>
+                </select>
+              </div>
+              <div>
+                <label for="contentType">内容类型</label>
+                <select id="contentType" name="contentType">
+                  <option value="产品介绍">产品介绍</option>
+                  <option value="知识分享" selected>知识分享</option>
+                  <option value="观点口播">观点口播</option>
+                  <option value="种草推荐">种草推荐</option>
+                  <option value="测评对比">测评对比</option>
+                  <option value="故事型内容">故事型内容</option>
+                </select>
+              </div>
+            </div>
+
+            <label for="model">AI模型</label>
+            <select id="model" name="model">
+              <option value="默认模型" selected>默认模型</option>
+              <option value="DeepSeek">DeepSeek</option>
+              <option value="OpenAI">OpenAI</option>
+              <option value="Gemini">Gemini</option>
+              <option value="Claude">Claude</option>
+              <option value="自定义模型">自定义模型</option>
+            </select>
+            <p class="field-hint">模型由服务端统一配置，密钥不会出现在网页中。</p>
+
+            <label for="requirements">创作要求 <span>（可选）</span></label>
+            <textarea id="requirements" name="requirements" rows="5" placeholder="可以补充你希望AI遵守的要求，例如：&#10;开头直接报车型，不要太销售感，语气自然一点，突出性价比，适合小红书"></textarea>
+
+            <button id="generate-button" type="submit"><span>生成脚本</span><span aria-hidden="true">→</span></button>
+            <p id="form-message" class="form-message" role="alert"></p>
+          </form>
+        </section>
+
+        <section class="panel result-panel" aria-live="polite" aria-labelledby="results-title">
+          <div class="result-heading">
+            <div class="panel-title"><span class="step">02</span><h2 id="results-title">生成结果</h2></div>
+            <span id="result-status" class="status">等待创作</span>
+          </div>
+          <div id="empty-state" class="empty-state">
+            <div class="empty-icon">✦</div>
+            <h3>从一个好主题开始</h3>
+            <p>填写左侧创作设置后，AI 会为你整理开头、完整分镜和可直接念的口播稿。</p>
+          </div>
+          <div id="loading-state" class="loading-state" hidden>
+            <span class="loader"></span><p>正在梳理创作思路，生成脚本中…</p>
+          </div>
+          <div id="result-content" hidden>
+            <section class="result-section">
+              <div class="section-kicker">01</div><h3>黄金开头</h3>
+              <div id="hooks" class="hooks"></div>
+            </section>
+            <section class="result-section storyboard-section">
+              <div class="section-kicker">02</div><h3>完整分镜脚本</h3>
+              <div id="storyboard" class="storyboard"></div>
+            </section>
+            <section class="result-section voiceover-section">
+              <div class="voiceover-title"><div><div class="section-kicker">03</div><h3>完整口播稿</h3></div><button id="copy-button" class="copy-button" type="button">复制口播稿</button></div>
+              <p id="full-voiceover" class="full-voiceover"></p>
+            </section>
+          </div>
+        </section>
+      </div>
+    </main>
+    <script src="app.js"></script>
+  </body>
+</html>
