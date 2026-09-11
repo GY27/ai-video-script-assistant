@@ -12,16 +12,17 @@ function setLoading(isLoading) {
   button.disabled = isLoading;
   button.querySelector('span').textContent = isLoading ? '正在创作脚本…' : '生成脚本';
   loadingState.hidden = !isLoading;
+  loadingState.style.display = isLoading ? 'flex' : 'none';
   if (isLoading) { emptyState.hidden = true; content.hidden = true; status.textContent = '正在创作'; status.className = 'status working'; }
 }
 
 function text(value) { return String(value || '').replace(/[&<>"']/g, char => ({ '&':'&amp;', '<':'&lt;', '>':'&gt;', '"':'&quot;', "'":'&#39;' }[char])); }
 function render(data) {
   document.querySelector('#hooks').innerHTML = (Array.isArray(data.hooks) ? data.hooks : []).slice(0, 3).map((hook, i) => `<article class="hook"><span class="hook-number">0${i + 1}</span><p>${text(hook)}</p></article>`).join('');
-  document.querySelector('#storyboard').innerHTML = (Array.isArray(data.storyboard) ? data.storyboard : []).map(shot => `<article class="shot"><div class="shot-time">${text(shot.time)}</div><div class="shot-main"><label>分镜 / 画面</label><p>${text(shot.visual)}</p><p class="shoot-tip">拍摄建议：${text(shot.shootingSuggestion)}</p></div><div class="shot-voice"><label>对应口播文案</label><p class="shot-topic">${text(shot.sectionTopic)}</p><p>${text(shot.voiceover)}</p></div></article>`).join('');
+  document.querySelector('#storyboard').innerHTML = (Array.isArray(data.storyboard) ? data.storyboard : []).map(shot => `<article class="shot"><div class="shot-time">${text(shot.time)}</div><div class="shot-main"><label>分镜 / 画面</label><p>${text(shot.visual)}</p><div class="shoot-tip"><strong>拍摄引导</strong><span>${text(shot.shootingSuggestion)}</span></div></div><div class="shot-voice"><label>对应口播文案</label><p class="shot-topic">${text(shot.sectionTopic)}</p><p class="voice-copy">${text(shot.voiceover)}</p></div></article>`).join('');
   currentVoiceover = String(data.fullVoiceover || '');
   document.querySelector('#full-voiceover').textContent = currentVoiceover;
-  content.hidden = false; emptyState.hidden = true; loadingState.hidden = true;
+  content.hidden = false; emptyState.hidden = true; loadingState.hidden = true; loadingState.style.display = 'none';
   status.textContent = '已生成'; status.className = 'status ready';
 }
 
