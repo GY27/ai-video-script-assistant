@@ -37,13 +37,14 @@ function demoScript(topic, duration, contentType) {
 
 export async function onRequestPost(context) {
   try {
-    const { topic, duration = '60秒', contentType = '知识分享', requirements = '', personaTemplate = '朋友分享型', persona = '' } = await context.request.json();
+    const { topic, duration = '60秒', contentType = '知识分享', requirements = '', personaTemplate = '朋友分享型', persona = '', model: requestedModel = 'DeepSeek' } = await context.request.json();
     if (!String(topic || '').trim()) return json({ error: 'Topic is required' }, 400);
     if (String(context.env.DEMO_MODE || '').toLowerCase() === 'true') return json(demoScript(topic.trim(), duration, contentType));
 
-    const apiKey = context.env.MODEL_API_KEY;
-    const baseUrl = context.env.MODEL_BASE_URL;
-    const model = context.env.MODEL_NAME;
+    const isGlm = String(requestedModel).toLowerCase() === 'glm';
+    const apiKey = isGlm ? context.env.GLM_API_KEY : context.env.MODEL_API_KEY;
+    const baseUrl = isGlm ? (context.env.GLM_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4') : context.env.MODEL_BASE_URL;
+    const model = isGlm ? (context.env.GLM_MODEL || 'glm-4-flash') : context.env.MODEL_NAME;
     if (!apiKey || !baseUrl || !model) return json({ error: 'Model is not configured' }, 503);
     const endpoint = `${String(baseUrl).replace(/\/$/, '')}/chat/completions`;
     const upstream = await fetch(endpoint, {
