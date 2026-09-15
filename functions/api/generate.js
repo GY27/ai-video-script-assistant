@@ -44,17 +44,26 @@ export async function onRequestPost(context) {
     const isGlm = String(requestedModel).toLowerCase() === 'glm';
     const apiKey = isGlm ? context.env.GLM_API_KEY : context.env.MODEL_API_KEY;
     const baseUrl = isGlm ? (context.env.GLM_BASE_URL || 'https://open.bigmodel.cn/api/paas/v4') : context.env.MODEL_BASE_URL;
-    const model = isGlm ? (context.env.GLM_MODEL || 'glm-4-flash') : context.env.MODEL_NAME;
+    const model = isGlm ? (context.env.GLM_MODEL || 'glm-4-flash') : (context.env.DEEPSEEK_MODEL || 'deepseek-flash');
     if (!apiKey || !baseUrl || !model) return json({ error: 'Model is not configured' }, 503);
-    const endpoint = `${String(baseUrl).replace(/\/$/, '')}/chat/completions`;
+    const webSearchEnabled = String(context.env.ENABLE_WEB_SEARCH ?? 'true').toLowerCase() !== 'false';
+    const deepseekRoot = String(baseUrl || 'https://api.deepseek.com').replace(/\/$/, '').replace(/\/v1$/, '');
+    const endpoint = isGlm ? `${String(baseUrl).replace(/\/$/, '')}/chat/completions` : `${deepseekRoot}/responses`;
+    const userInput = `主题：${topic}\n时长：${duration}\n内容类型：${contentType}\n人设模板：${personaTemplate}\n人设与能力边界：${persona || '沿用模板'}\n额外创作要求：${requirements || '无'}\n\n请在生成前联网核实产品规格、价格、卖点和官网信息。最多搜索 2 次，优先官方网站和权威评测；无法确认的信息标注“待核实”，不要猜测。`;
+    const requestBody = isGlm
+      ? { model, temperature: 0.7, response_format: { type: 'json_object' }, messages: [{ role:'system', content:SYSTEM_PROMPT }, { role:'user', content:userInput }] }
+      : { model, instructions: SYSTEM_PROMPT, input: userInput, max_output_tokens: 4000, text: { format: { type: 'json_object' } }, ...(webSearchEnabled ? { tools: [{ type: 'web_search' }], tool_choice: 'auto' } : {}) };
     const upstream = await fetch(endpoint, {
       method: 'POST',
       headers: { 'Content-Type': 'application/json', Authorization: `Bearer ${apiKey}` },
-      body: JSON.stringify({ model, temperature: 0.7, response_format: { type: 'json_object' }, messages: [{ role:'system', content:SYSTEM_PROMPT }, { role:'user', content:`主题：${topic}\n时长：${duration}\n内容类型：${contentType}\n人设模板：${personaTemplate}\n人设与能力边界：${persona || '沿用模板'}\n额外创作要求：${requirements || '无'}` }] })
+      body: JSON.stringify(requestBody)
     });
     if (!upstream.ok) throw new Error('Upstream model request failed');
     const payload = await upstream.json();
-    return json(cleanJson(payload?.choices?.[0]?.message?.content));
+    if (!isGlm) console.log('DeepSeek usage:', JSON.stringify(payload?.usage || {}), 'status:', payload?.status, 'web_search:', (payload?.output || []).some(item => item?.type === 'web_search_call'));
+    if (!isGlm && payload?.status === 'failed') throw new Error(payload?.error?.message || 'DeepSeek response failed');
+    const outputText = isGlm ? payload?.choices?.[0]?.message?.content : payload?.output_text;
+    return json(cleanJson(outputText));
   } catch (error) {
     console.error('generate failed', error);
     return json({ error: 'Unable to generate script' }, 500);
